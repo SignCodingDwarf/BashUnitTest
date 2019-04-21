@@ -3,7 +3,7 @@
 # file :  cleanUtils.sh
 # author : SignC0dingDw@rf
 # version : 0.1
-# date : 18 April 2019
+# date : 21 April 2019
 # Definition of utility functions to clean environment after test
 
 ###
@@ -177,26 +177,28 @@ RestoreEnvVars()
 {
     local NB_FAILS=0 # Number of file delete failures
     local ENV_VARS_VALUES=("$@")
-    local ENV_VARS_INDEXES=(${!ENV_VARS_VALUES[@]}) # Get the list of indexes as an array
-    local ENV_VARS_MAX_INDEX=${ENV_VARS_INDEXES[-1]} # Last element is the maximum index
-    if [ $((ENV_VARS_MAX_INDEX%2)) -eq 0 ]; then # If the last index is even, we miss one value since arrays are 0-indexed
-        ((NB_FAILS++)) # last value will not be set so it is an error
-        ((ENV_VARS_MAX_INDEX--)) # We decrement the value to get the termination index
-    fi
-
-    local index=0
-    while [ ${index} -lt ${ENV_VARS_MAX_INDEX} ]; do
-        local VARIABLE=${!ENV_VARS_VALUES[${index}]}
-        local VALUE=${!ENV_VARS_VALUES[${index}+1]}
-        PrintInfo "Restoring variable ${VARIABLE} with value ${VALUE}"
-        declare ${VARIABLE}=${VALUE} # Affect variable with value
-        local VAR_NAME=${VARIABLE}
-        if [ ! "${!VAR_NAME}" = "${VALUE}" ]; then
-            PrintError "Failed to affect ${VARIABLE} with value ${VALUE}. Current value is ${!VAR_NAME}"
-            ((NB_FAILS++))
+    if [ ${#ENV_VARS_VALUES[@]} -ne 0 ]; then # Failure with indexes if empty array
+        local ENV_VARS_INDEXES=(${!ENV_VARS_VALUES[@]}) # Get the list of indexes as an array
+        local ENV_VARS_MAX_INDEX=${ENV_VARS_INDEXES[-1]} # Last element is the maximum index
+        if [ $((ENV_VARS_MAX_INDEX%2)) -eq 0 ]; then # If the last index is even, we miss one value since arrays are 0-indexed
+            ((NB_FAILS++)) # last value will not be set so it is an error
+            ((ENV_VARS_MAX_INDEX--)) # We decrement the value to get the termination index
         fi
-        ((index+=2))
-    done
+
+        local index=0
+        while [ ${index} -lt ${ENV_VARS_MAX_INDEX} ]; do
+            local VARIABLE=${!ENV_VARS_VALUES[${index}]}
+            local VALUE=${!ENV_VARS_VALUES[${index}+1]}
+            PrintInfo "Restoring variable ${VARIABLE} with value ${VALUE}"
+            declare ${VARIABLE}=${VALUE} # Affect variable with value
+            local VAR_NAME=${VARIABLE}
+            if [ ! "${!VAR_NAME}" = "${VALUE}" ]; then
+                PrintError "Failed to affect ${VARIABLE} with value ${VALUE}. Current value is ${!VAR_NAME}"
+                ((NB_FAILS++))
+            fi
+            ((index+=2))
+        done
+    fi
 
     return $NB_FAILS
 }
