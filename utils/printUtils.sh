@@ -2,8 +2,8 @@
 
 # file :  printUtils.sh
 # author : SignC0dingDw@rf
-# version : 0.1
-# date : 16 April 2019
+# version : 0.2
+# date : 05 May 2019
 # Definition of utilitaries and variables used to display information
 
 ###
@@ -77,6 +77,26 @@ NC='\033[0m' # No Color
 
 ### Functions
 ##!
+# @brief Detect if output is written to a terminal or not
+# @param 1 : Terminal name
+# @return 0 if terminal, 1 if not a terminal, 2 if input is invalid
+#
+# From https://stackoverflow.com/questions/911168/how-to-detect-if-my-shell-script-is-running-through-a-pipe
+#
+##
+IsWrittenToTerminal()
+{
+    if [ -z "$1" ]; then
+        return 2
+    fi
+    if [ -t $1 ]; then
+        return 0
+    else
+        return 1
+    fi 
+}
+
+##!
 # @brief Print an information formatted message to the stderr
 # @param * : Elements to display
 # @return 0 if printing was successful, >0 otherwise
@@ -85,6 +105,7 @@ NC='\033[0m' # No Color
 # Uses the environment defined VERBOSE to determine whether printg should be done.
 # Uses the principle of collapsing functions in bash 
 # https://wiki.bash-hackers.org/howto/collapsing_functions 
+# Format depends on output type (terminal or not)
 #
 ##
 PrintInfo()
@@ -92,7 +113,16 @@ PrintInfo()
     if [ "${VERBOSE}" = true ]; then
         PrintInfo() # Print is defined as verbose at first call
         {
-            printf "${infoColor}%s${NC}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr 
+            local formatBegin=""
+            local formatEnd=""
+            IsWrittenToTerminal 2
+            if [ $? -eq 0 ]; then
+                formatBegin=${infoColor}
+                formatEnd=${NC}
+            else
+                formatBegin="[Info] : "
+            fi
+            printf "${formatBegin}%s${formatEnd}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr 
         }
         PrintInfo "$*" # We print the first thing we wanted to print
     else
@@ -109,11 +139,21 @@ PrintInfo()
 # @return 0 if printing was successful, >0 otherwise
 #
 # From https://stackoverflow.com/questions/2990414/echo-that-outputs-to-stderr
+# Format depends on output type (terminal or not)
 #
 ##
 PrintWarning()
 {
-    printf "${warningColor}%s${NC}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr 
+    local formatBegin=""
+    local formatEnd=""
+    IsWrittenToTerminal 2
+    if [ $? -eq 0 ]; then
+        formatBegin=${warningColor}
+        formatEnd=${NC}
+    else
+        formatBegin="[Warning] : "
+    fi
+    printf "${formatBegin}%s${formatEnd}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr
 }
 
 ##!
@@ -122,11 +162,21 @@ PrintWarning()
 # @return 0 if printing was successful, >0 otherwise
 #
 # From https://stackoverflow.com/questions/2990414/echo-that-outputs-to-stderr
+# Format depends on output type (terminal or not)
 #
 ##
 PrintError()
 {
-    printf "${errorColor}%s${NC}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr 
+    local formatBegin=""
+    local formatEnd=""
+    IsWrittenToTerminal 2
+    if [ $? -eq 0 ]; then
+        formatBegin=${errorColor}
+        formatEnd=${NC}
+    else
+        formatBegin="[Error] : "
+    fi
+    printf "${formatBegin}%s${formatEnd}\n" "$*" >&2 # Concatenate args into a string, print it and redirect to stderr 
 }
 
 #  ______________________________ 

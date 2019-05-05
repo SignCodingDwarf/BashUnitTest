@@ -77,6 +77,8 @@ FAILED_TEST_NB=0
 # @param 3 : Current value
 # @return 0 if color has expected value, 1 otherwise
 #
+# Also increments FAILED_TEST_NB to ligthen test "main" structure
+#
 ##
 TestColor()
 {
@@ -87,9 +89,10 @@ TestColor()
     if [ "${currentValue}" = "${expectedValue}" ]; then
         return 0
     else
-        echo "Invalid ${colorName}s"
+        echo "Invalid ${colorName}"
         echo "Expected ${expectedValue}"
         echo "Got ${currentValue}"
+        ((FAILED_TEST_NB++)) ## New invalid test
         return 1    
     fi
 }
@@ -102,6 +105,8 @@ TestColor()
 # @param 3 : Message
 # @return 0 if function displays message as expected, 1 if message is not printed correctly or 2 if function name is unknown
 #
+# Also increments FAILED_TEST_NB to ligthen test "main" structure
+#
 ##
 TestPrint()
 {
@@ -109,27 +114,34 @@ TestPrint()
     local isVerbose=$2
     local message=$3
 
-    local writtenMessage=$(${functionName} "${message}" 2>&1) # Print message on error flux and redirect it to standard output to catch it
+    # Construct expected result
     if [ "${functionName}" = "PrintInfo" ]; then
         if [ "${isVerbose}" = true ]; then
-            local expectedMessage="\033[1;34m${message}\033[0m"
+            local expectedMessage="[Info] : ${message}"
         else
             local expectedMessage=""
         fi
     elif [ "${functionName}" = "PrintWarning" ]; then
-        local expectedMessage="\033[1;33m${message}\033[0m"
+        local expectedMessage="[Warning] : ${message}"
     elif [ "${functionName}" = "PrintError" ]; then
-        local expectedMessage="\033[1;31m${message}\033[0m"
+        local expectedMessage="[Error] : ${message}"
     else
         echo "Unknown function ${functionName}"
+        ((FAILED_TEST_NB++)) ## New invalid test
         return 2
     fi
 
+    # Run function and get Written message
+    ${functionName} "${message}" 2> toto # Print message on test
+    writtenMessage=$(cat toto)
+
+    # Compute output
     if [ "${writtenMessage}" = "${expectedMessage}" ]; then
         return 0
     else
         echo "Expected ${functionName} to print ${expectedMessage}"
         echo "but ${writtenMessage} was printed"
+        ((FAILED_TEST_NB++)) ## New invalid test
         return 1
     fi
 }
@@ -139,55 +151,71 @@ TestPrint()
 
 ### Test colors
 TestColor "usage color" "\033[1;34m" ${usageColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "description color" "\033[1;31m" ${descriptionColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "help options color" "\033[1;32m" ${helpOptionsColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "help category color" "\033[1;33m" ${helpCategoryColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "info color" "\033[1;34m" ${infoColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "warning color" "\033[1;33m" ${warningColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "error color" "\033[1;31m" ${errorColor}
-if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
-fi
-
 TestColor "No format" "\033[0m" ${NC}
+
+### Test IsWrittenToTerminal
+IsWrittenToTerminal 1 # Standard output to terminal
 if [ $? -ne 0 ]; then
-     ((FAILED_TEST_NB++)) ## New invalid test
+    ((FAILED_TEST_NB++)) ## New invalid test
+    echo "[IsWrittenToTerminal] : Standard output is not written to a terminal"
 fi
 
-### Test print with no verbosity
+IsWrittenToTerminal 1 > toto # Detection of redirection
+if [ $? -ne 1 ]; then
+    ((FAILED_TEST_NB++)) ## New invalid test
+    echo "[IsWrittenToTerminal] : Standard output is not redirected to file"
+fi
+
+IsWrittenToTerminal # Invalid input
+if [ $? -ne 2 ]; then
+    ((FAILED_TEST_NB++)) ## New invalid test
+    echo "[IsWrittenToTerminal] : Wrong detection of invalid input"
+fi
+
+IsWrittenToTerminal 2 > toto # Error is not redirected
+if [ $? -ne 0 ]; then
+    ((FAILED_TEST_NB++)) ## New invalid test
+    echo "[IsWrittenToTerminal] : Error output should not be redirected"
+fi
+
+IsWrittenToTerminal 2 2> toto # Error is redirected
+if [ $? -ne 1 ]; then
+    ((FAILED_TEST_NB++)) ## New invalid test
+    echo "[IsWrittenToTerminal] : Error output should be redirected"
+fi
+
+### Test print with no verbosity 
+# Only redirection to file is tested
 TestPrint PrintInfo false "Some info message" # Should display nothing
 TestPrint PrintWarning false "Some warning message"
 TestPrint PrintError false "Some error message"
 
 VERBOSE=true # Enable verbosity
-TestPrint PrintInfo false "Some info message" # Still displays nothing because funtion is defined once and for all at fisrt call
+TestPrint PrintInfo false "Some other info message" # Still displays nothing because funtion is defined once and for all at fisrt call
 
+### Test print with verbosity 
+. "../utils/printUtils.sh" # Reload print utils to "reset" PrintInfo
+TestPrint PrintInfo true "Yet another info message"
+TestPrint PrintWarning true "Yet another warning message"
+TestPrint PrintError true "Yet another error message"
+
+VERBOSE=false # Disable verbosity
+TestPrint PrintInfo true "The last info message" # Still displays because funtion is defined once and for all at fisrt call
+
+### Clean up
+rm toto
+
+### Test result
 if [ ${FAILED_TEST_NB} -eq 0 ]; then
     echo -e "\033[1;32mTest OK\033[0m"
+else
+    echo -e "\033[1;31mTest KO\033[0m"
 fi
 
 exit ${FAILED_TEST_NB}
