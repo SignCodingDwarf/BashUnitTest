@@ -2,8 +2,8 @@
 
 # file :  cleanUtils.sh
 # author : SignC0dingDw@rf
-# version : 0.1
-# date : 21 April 2019
+# version : 0.2
+# date : 23 May 2019
 # Definition of utility functions to clean environment after test
 
 ###
@@ -149,7 +149,7 @@ RestoreFiles()
     local NB_FAILS=0 # Number of file delete failures
     local FILES=("$@")
     for file in "${FILES[@]}"; do 
-        PrintInfo "Restoring ${dir}"
+        PrintInfo "Restoring ${file}"
         rm -f ${file}
         if [ $? -gt 0 ]; then # Command is expected to return 0 when not failing
             ((NB_FAILS++))
@@ -187,10 +187,10 @@ RestoreEnvVars()
 
         local index=0
         while [ ${index} -lt ${ENV_VARS_MAX_INDEX} ]; do
-            local VARIABLE=${!ENV_VARS_VALUES[${index}]}
-            local VALUE=${!ENV_VARS_VALUES[${index}+1]}
+            local VARIABLE=${ENV_VARS_VALUES[${index}]}
+            local VALUE=${ENV_VARS_VALUES[${index}+1]}
             PrintInfo "Restoring variable ${VARIABLE} with value ${VALUE}"
-            declare ${VARIABLE}=${VALUE} # Affect variable with value
+            read ${VARIABLE} <<< ${VALUE} # https://unix.stackexchange.com/questions/68346/is-it-possible-to-use-indirection-for-setting-variables
             local VAR_NAME=${VARIABLE}
             if [ ! "${!VAR_NAME}" = "${VALUE}" ]; then
                 PrintError "Failed to affect ${VARIABLE} with value ${VALUE}. Current value is ${!VAR_NAME}"
