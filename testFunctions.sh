@@ -2,8 +2,8 @@
 
 # file :  testFunctions.sh
 # author : SignC0dingDw@rf
-# version : 0.1
-# date : 18 April 2019
+# version : 1.0
+# date : 25 May 2019
 # Definition of functions used in test process
 
 ###
@@ -61,9 +61,10 @@
 ###
 
 ### Include
-. "utils/printUtils.sh"
-. "utils/functionUtils.sh"
-. "utils/cleanUtils.sh"
+SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+. "${SCRIPT_LOCATION}/BashUtils/printUtils.sh"
+. "${SCRIPT_LOCATION}/BashUtils/functionUtils.sh"
+. "${SCRIPT_LOCATION}/BashUtils/cleanUtils.sh"
 
 ##!
 # @brief Test setup phase
@@ -149,7 +150,7 @@ Teardown()
     fi
 
     # Restore environment variables
-    RestoreEnvVars "${FENV_VARS_VALUES_TO_RESTORE[@]}"
+    RestoreEnvVars "${ENV_VARS_VALUES_TO_RESTORE[@]}"
     if [ $? -gt 0 ]; then
         ((EXIT_CODE+=16))
     fi

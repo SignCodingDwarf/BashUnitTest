@@ -1,0 +1,3 @@
+[submodule "BashUtils"]
+	path = BashUtils
+	url = https://github.com/SignCodingDwarf/BashUtils.git

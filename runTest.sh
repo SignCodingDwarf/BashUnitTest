@@ -2,8 +2,8 @@
 
 # file :  runTest.sh
 # author : SignC0dingDw@rf
-# version : 0.1
-# date : 16 April 2019
+# version : 1.0
+# date : 25 May 2019
 # Main script allowing to run a Bash Unit Test
 
 ### command line arguments
@@ -72,10 +72,11 @@
 ###
 
 ### Include
-. "testFunctions.sh"
+SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+. "${SCRIPT_LOCATION}/testFunctions.sh"
 
 ### Version STR
-VERSION_STR="0.1"
+VERSION_STR="1.0"
 
 ### Behavior variables
 VERBOSE=false
