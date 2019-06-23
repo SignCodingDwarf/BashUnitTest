@@ -2,8 +2,8 @@
 
 # file :  declareDeletion.sh
 # author : SignC0dingDw@rf
-# version : 1.0
-# date : 31 May 2019
+# version : 1.1
+# date : 23 June 2019
 # Definition of functions used to declare directories and files to delete
 
 ###
@@ -73,8 +73,8 @@ if [ -z ${DECLAREDELETION_SH} ]; then
 DECLAREDELETION_SH="DECLAREDELETION_SH" # Reset using DECLAREDELETION_SH=""
 
 ### Include
-SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-. "${SCRIPT_LOCATION}/../BashUtils/printUtils.sh"
+SCRIPT_LOCATION_DECLAREDELETION_SH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+. "${SCRIPT_LOCATION_DECLAREDELETION_SH}/../BashUtils/printUtils.sh"
 
 ##!
 # @brief Declare folders to delete

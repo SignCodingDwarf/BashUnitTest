@@ -2,8 +2,8 @@
 
 # file :  runTest.sh
 # author : SignC0dingDw@rf
-# version : 1.0
-# date : 25 May 2019
+# version : 1.1
+# date : 23 June 2019
 # Main script allowing to run a Bash Unit Test
 
 ### command line arguments
@@ -79,8 +79,9 @@
 ###
 
 ### Include
-SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-. "${SCRIPT_LOCATION}/testFunctions.sh"
+SCRIPT_LOCATION_RUNTEST_SH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+. "${SCRIPT_LOCATION_RUNTEST_SH}/testFunctions.sh"
+. "${SCRIPT_LOCATION_RUNTEST_SH}/BashUtils/cmdHelpUtils.sh"
 
 ### Version STR
 VERSION_STR="1.0"
@@ -96,17 +97,16 @@ TEST_NAME=""
 ##
 Usage()
 {
-    echo -e "Usage \n"
-    echo -e "${usageColor} ./${0##*/} [options] <test_name>${NC}\n"
-    echo -e "${descriptionColor}Main script allowing to run a Bash Unit Test${NC}\n"
+    PrintUsage "runTest.sh" "[options]" "<test_name>"
+    PrintDescription "Main script allowing to run a Bash Unit Test"
     echo -e "Options:"
-    echo -e "${helpCategoryColor}----- General Options -----${NC}"
-    echo -e "${helpOptionsColor}-h${NC} or ${helpOptionsColor}--help${NC}\t\t show this help message and exit"
-    echo -e "${helpOptionsColor}--version${NC}\t\t show program's version number and exit"
+    PrintOptionCategory "General Options"
+    PrintOption "-h" "--help" "show this help message and exit"
+    PrintOption "--version" "show program's version number and exit"
     echo -e ""
-    echo -e "${helpCategoryColor}----- Execution Details -----${NC}"
-    echo -e "${helpOptionsColor}-v${NC}\t\t make test execution verbose"
-    echo -e "${helpOptionsColor}-x${NC}\t\t detailed execution information"
+    PrintOptionCategory "Execution Details"
+    PrintOption "-v" "make test execution verbose"
+    PrintOption "-x" "detailed execution information"
     echo -e ""
 }
 
