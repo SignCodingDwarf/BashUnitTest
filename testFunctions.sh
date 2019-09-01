@@ -2,8 +2,8 @@
 
 # file :  testFunctions.sh
 # author : SignC0dingDw@rf
-# version : 1.0
-# date : 25 May 2019
+# version : 1.1
+# date : 01 September 2019
 # Definition of functions used in test process
 
 ###
@@ -71,7 +71,7 @@
 SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 . "${SCRIPT_LOCATION}/BashUtils/printUtils.sh"
 . "${SCRIPT_LOCATION}/BashUtils/functionUtils.sh"
-. "${SCRIPT_LOCATION}/BashUtils/cleanUtils.sh"
+. "${SCRIPT_LOCATION}/utils/clean.sh"
 
 ##!
 # @brief Test setup phase
